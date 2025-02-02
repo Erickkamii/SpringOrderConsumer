@@ -8,15 +8,22 @@ import org.springframework.stereotype.Component;
 
 import static springorderconsumer.orderconsumer.config.RabbitMqConfig.ORDER_CREATED_QUEUE;
 import springorderconsumer.orderconsumer.listener.dto.OrderCreatedEvent;
+import springorderconsumer.orderconsumer.services.OrderService;
 
 @Component
 public class OrderCreatedListener {
 
     private final Logger logger = LoggerFactory.getLogger(OrderCreatedListener.class);
 
+    private final OrderService orderService;
+
+    public OrderCreatedListener(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @RabbitListener(queues = ORDER_CREATED_QUEUE)
     public void listen(Message<OrderCreatedEvent>message){
         logger.info("Message consumed:{}", message);
+        orderService.save(message.getPayload());
     }
 }
